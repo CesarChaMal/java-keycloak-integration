@@ -1,6 +1,7 @@
 # API Integration Example with Keycloak 
 
 Connecting between Java Application with Keycloak for Authentication and Authorization example. 
+https://developers.redhat.com/blog/2020/11/24/authentication-and-authorization-using-the-keycloak-rest-api
 
  ## Tools
  - Java 11

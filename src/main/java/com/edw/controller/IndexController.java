@@ -25,6 +25,7 @@ import java.util.*;
  * 17 Agt 2020 21:15
  */
 @RestController
+//@Controller
 public class IndexController {
 
     private Logger logger = LoggerFactory.getLogger(IndexController.class);
@@ -86,7 +87,9 @@ public class IndexController {
     }
 
     @GetMapping("/valid")
+//    @RequestMapping(value = "/valid", method = RequestMethod.GET)
     public HashMap valid(@RequestHeader("Authorization") String authHeader) {
+//    public @ResponseBody String valid(@RequestHeader("Authorization") String authHeader) {
         try {
             restService.checkValidity(authHeader);
             return new HashMap (){{
@@ -95,7 +98,22 @@ public class IndexController {
         } catch (Exception e) {
             logger.error("token is not valid, exception : {} ", e.getMessage());
             return new HashMap (){{
-                put("is_valid", "false");
+                 put("is_valid", "false");
+            }};
+        }
+    }
+
+    @PostMapping(value = "/deactivate-user", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map deactivateUser(String username, String password, String deactivate) {
+        try {
+            restService.deactivateUser(username, password, deactivate);
+            return new HashMap (){{
+                put("is_deactivate", "true");
+            }};
+        } catch (Exception e) {
+            logger.error("token is not valid, exception : {} ", e.getMessage());
+            return new HashMap (){{
+                put("is_deactivate", "false");
             }};
         }
     }

@@ -1,6 +1,12 @@
 package com.edw.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -49,6 +55,12 @@ public class KeycloakRestService {
     @Value("${keycloak.scope}")
     private String scope;
 
+    @Value("${keycloak.server-url}")
+    private String serverURL;
+
+    @Value("${keycloak.realm}")
+    private String realm;
+
     /**
      *  login by using username and password to keycloak, and capturing token on response body
      *
@@ -57,6 +69,7 @@ public class KeycloakRestService {
      * @return
      */
     public String login(String username, String password) {
+/*
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("username",username);
         map.add("password",password);
@@ -67,6 +80,38 @@ public class KeycloakRestService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
         return restTemplate.postForObject(keycloakTokenUri, request, String.class);
+*/
+        Keycloak keycloak = getKeycloak(username, password);
+        return keycloak.tokenManager().getAccessToken().getToken();
+    }
+
+    public void deactivateUser(String username, String password, String userToDeactivate) throws Exception {
+        Keycloak keycloak = getKeycloak(username, password);
+        System.out.println(keycloak.tokenManager().getAccessToken().getToken());
+
+        RealmResource realmResource = keycloak.realm(realm);
+        UsersResource userRessource = realmResource.users();
+
+//        UserRepresentation userRepresentation = keycloak.realm(realm).users().list().stream().filter(u -> u.getUsername().equals(userToDeactivate)).findFirst().orElse(null);
+        UserRepresentation user = userRessource.list().stream().filter(u -> u.getUsername().equals(userToDeactivate)).findFirst().orElse(null);
+
+        System.out.println(user.isEnabled());
+        user.setEnabled(false);
+        System.out.println(user.isEnabled());
+
+        userRessource.get(user.getId()).update(user);
+    }
+
+    private Keycloak getKeycloak(String username, String password) {
+        return KeycloakBuilder.builder()
+                    .serverUrl(serverURL)
+                    .realm(realm)
+                    .username(username)
+                    .password(password)
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(20).build())
+                    .build();
     }
 
     /**
