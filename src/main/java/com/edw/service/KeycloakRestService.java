@@ -90,16 +90,16 @@ public class KeycloakRestService {
         System.out.println(keycloak.tokenManager().getAccessToken().getToken());
 
         RealmResource realmResource = keycloak.realm(realm);
-        UsersResource userRessource = realmResource.users();
+        UsersResource userResource = realmResource.users();
 
 //        UserRepresentation userRepresentation = keycloak.realm(realm).users().list().stream().filter(u -> u.getUsername().equals(userToDeactivate)).findFirst().orElse(null);
-        UserRepresentation user = userRessource.list().stream().filter(u -> u.getUsername().equals(userToDeactivate)).findFirst().orElse(null);
+        UserRepresentation user = userResource.list().stream().filter(u -> u.getUsername().equals(userToDeactivate)).findFirst().orElse(null);
 
         System.out.println(user.isEnabled());
         user.setEnabled(false);
         System.out.println(user.isEnabled());
 
-        userRessource.get(user.getId()).update(user);
+        userResource.get(user.getId()).update(user);
     }
 
     private Keycloak getKeycloak(String username, String password) {
